@@ -1,0 +1,46 @@
+<html>
+<head>
+<title>Flask Index Page</title>
+<style>
+.divTable{display: table; width: 100%;}
+.divTableRow {display: table-row;}
+.divTableHeading {background-color: #EEE;display: table-header-group;}
+.divTableCell, .divTableHead {border: 1px solid #999999;display: table-cell;padding: 3px 10px;}
+.divTableHeading {background-color: #EEE;display: table-header-group;font-weight: bold;}
+.divTableFoot {background-color: #EEE;display: table-footer-group;font-weight: bold;}
+.divTableBody {display: table-row-group;}
+</style>
+</head>
+<body>
+<h1>Flask Index Page</h1>
+<p>Flask Index Page</p>
+{% if data %}
+<h3><a href="https://{{- data[1] -}}.s3.amazonaws.com/{{- data[2] -}}">Download current AWS bucket instance of USER CSV</a></h3>
+<h3><a href="https://{{- data[1] -}}.s3.amazonaws.com/{{- data[3] -}}">Download current AWS bucket instance of ADDRESS CSV</a></h3>
+<div id='info_section'>
+    <div class="divTable">
+        <div class="divTableBody">
+            <div class="divTableRow">
+                <div class="divTableCell">Discord ID</div>
+                <div class="divTableCell">Index</div>
+                <div class="divTableCell">First Time</div>
+                <div class="divTableCell">Last Time</div>
+                <div class="divTableCell">Wallet Address</div>
+                <div class="divTableCell">Discord Username</div>
+            </div>
+            {% for row in data[0] %}
+                <div class="divTableRow">
+                    <div class="divTableCell">{{ row[0] }}</div>
+                    <div class="divTableCell">{{ row[1] }}</div>
+                    <div class="divTableCell">{{ row[2] }}</div>
+                    <div class="divTableCell">{{ row[3] }}</div>
+                    <div class="divTableCell">{{ row[4] }}</div>
+                    <div class="divTableCell">{{ row[5] }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+</body>
+</html>

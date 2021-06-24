@@ -1,0 +1,10 @@
+# AUTHENTICATION KEYS AND OTHER CONFIDENTIAL INFORMATION
+bucket.txt
+token.txt
+
+# Incomplete Documentation
+docs/**/*.pptx
+docs/**/*.docx
+
+# IDE
+.vscode/

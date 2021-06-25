@@ -13,6 +13,11 @@ ASSET_SYMBOL_STRING = "ETH"
 
 # ENABLE_CONSOLE_OUTPUT: A value of False will disable any print() statements within the code
 ENABLE_CONSOLE_OUTPUT = True
+# SAVE_DIRECTORY: List of subfolders (starting from the root directory) into which all files will be saved.
+#                  - Each list element should be a string which functions as a valid folder name
+#                  - Empty list will cause all files to be saved and loaded to/from the root directory
+#                  - This variable applies to both local and AWS Bucket saving 
+SAVE_DIRECTORY = ["save", "subdir"]
 # TOKEN_FILE_NAME: File name containing Discord Bot Token
 TOKEN_FILE_NAME = "token"
 # TOKEN_FILE_EXTENSION: File extension specifically for file containing Discord Bot Token

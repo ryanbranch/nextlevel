@@ -8,3 +8,6 @@ docs/**/*.docx
 
 # IDE
 .vscode/
+
+# PYTHON
+__pycache__/

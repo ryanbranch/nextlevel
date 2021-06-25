@@ -14,6 +14,17 @@ import nextlevel_config as nc
 class Wrapper():
 
     def __init__(self):
+
+        # Make the local directories for saving (if they don't already exist)
+        self.saveDirString = "/".join(nc.SAVE_DIRECTORY)
+        if not os.path.exists(str(Path.cwd() / self.saveDirString)):
+            if nc.ENABLE_CONSOLE_OUTPUT:
+                print("No save directory detected.")
+            for i in range(len(nc.SAVE_DIRECTORY)):
+                os.makedirs(Path.cwd() / ("/".join(nc.SAVE_DIRECTORY[0:i + 1])))
+            if nc.ENABLE_CONSOLE_OUTPUT:
+                print("Save directory created.")
+
         # INSTANTIABLE MEMBER VARIABLES
         # s3: boto3 client instance
         self.s3 = boto3.client("s3")
@@ -77,10 +88,13 @@ class Wrapper():
     # downloadS3
     # Downloads the USER and ADDRESS files from the designated S3 bucket (regardless of public or private ACL settings)
     def downloadS3(self):
+        # Build path strings
+        userFilepath = str(Path.cwd() / self.saveDirString / (nc.USER_FILE_NAME + nc.FILE_EXTENSION))
+        addressFilepath = str(Path.cwd() / self.saveDirString / (nc.ADDRESS_FILE_NAME + nc.FILE_EXTENSION))
         # AMAZON WEB SERVICES S3 FILE RETRIEVAL
         # Attempt to download the USER file from S3
         try:
-            self.s3.download_file(self.bucketName, (nc.USER_FILE_NAME + nc.FILE_EXTENSION), (nc.USER_FILE_NAME + nc.FILE_EXTENSION))
+            self.s3.download_file(self.bucketName, (self.saveDirString + "/" + (nc.USER_FILE_NAME + nc.FILE_EXTENSION)), userFilepath)
         except ClientError as e:
             logging.error(e)
             if nc.ENABLE_CONSOLE_OUTPUT:
@@ -92,7 +106,7 @@ class Wrapper():
                 print("Downloaded USER information file from AWS S3 Bucket.")
         # Attempt to download the ADDRESS file from S3
         try:
-            self.s3.download_file(self.bucketName, (nc.ADDRESS_FILE_NAME + nc.FILE_EXTENSION), (nc.ADDRESS_FILE_NAME + nc.FILE_EXTENSION))
+            self.s3.download_file(self.bucketName, (self.saveDirString + "/" + (nc.ADDRESS_FILE_NAME + nc.FILE_EXTENSION)), addressFilepath)
         except ClientError as e:
             logging.error(e)
             if nc.ENABLE_CONSOLE_OUTPUT:
@@ -107,8 +121,12 @@ class Wrapper():
     # uploadS3
     # Uploads the USER and ADDRESS files to the designated S3 bucket (and gives them public-read permissions)
     def uploadS3(self):
+        # Build path strings
+        userFilepath = str(Path.cwd() / self.saveDirString / (nc.USER_FILE_NAME + nc.FILE_EXTENSION))
+        addressFilepath = str(Path.cwd() / self.saveDirString / (nc.ADDRESS_FILE_NAME + nc.FILE_EXTENSION))
+
         # Open the USER save file for WRITING
-        with open(str(Path.cwd() / (nc.USER_FILE_NAME + nc.FILE_EXTENSION)), "w", newline="") as csvFile:
+        with open(userFilepath, "w", newline="") as csvFile:
             csvWriter = csv.writer(csvFile, delimiter=",")
             # Iterate through each user in the userList
             for sublist in self.userList:
@@ -118,7 +136,7 @@ class Wrapper():
                 print("Successfully saved USER file with " + str(self.userCount) + " rows.")
 
         # Open the ADDRESS save file for WRITING
-        with open(str(Path.cwd() / (nc.ADDRESS_FILE_NAME + nc.FILE_EXTENSION)), "w", newline="") as csvFile:
+        with open(addressFilepath, "w", newline="") as csvFile:
             csvWriter = csv.writer(csvFile, delimiter=",")
             # Iterate through each user in the allAddressDict
             # KEY = ADDRESS (STRING), VALUE = DISCORD USER ID (INT, but cast to string before saving)
@@ -131,7 +149,7 @@ class Wrapper():
         # AMAZON WEB SERVICES S3 BUCKET SAVING (UPLOADING)
         # Attempt to upload the USER file to S3
         try:
-            self.s3.upload_file((nc.USER_FILE_NAME + nc.FILE_EXTENSION), self.bucketName, (nc.USER_FILE_NAME + nc.FILE_EXTENSION), ExtraArgs={'ACL':'public-read'})
+            self.s3.upload_file(userFilepath, self.bucketName, (self.saveDirString + "/" + (nc.USER_FILE_NAME + nc.FILE_EXTENSION)), ExtraArgs={'ACL':'public-read'})
         except ClientError as e:
             logging.error(e)
             if nc.ENABLE_CONSOLE_OUTPUT:
@@ -141,7 +159,7 @@ class Wrapper():
                 print("Uploaded USER information file to AWS S3 Bucket.")
         # Attempt to upload the ADDRESS file to S3
         try:
-            self.s3.upload_file((nc.ADDRESS_FILE_NAME + nc.FILE_EXTENSION), self.bucketName, (nc.ADDRESS_FILE_NAME + nc.FILE_EXTENSION), ExtraArgs={'ACL':'public-read'})
+            self.s3.upload_file(addressFilepath, self.bucketName, (self.saveDirString + "/" + (nc.ADDRESS_FILE_NAME + nc.FILE_EXTENSION)), ExtraArgs={'ACL':'public-read'})
         except ClientError as e:
             logging.error(e)
             if nc.ENABLE_CONSOLE_OUTPUT:
@@ -155,7 +173,7 @@ class Wrapper():
     # Saves, according to app_config.py, a file of USER information from local storage
     def saveUsers(self):
         # Open the USER save file for WRITING
-        with open(str(Path.cwd() / (nc.USER_FILE_NAME + nc.FILE_EXTENSION)), "w", newline="") as csvFile:
+        with open(str(Path.cwd() / self.saveDirString / (nc.USER_FILE_NAME + nc.FILE_EXTENSION)), "w", newline="") as csvFile:
             csvWriter = csv.writer(csvFile, delimiter=",")
             # Iterate through each user in the userList
             for sublist in self.userList:
@@ -169,7 +187,7 @@ class Wrapper():
     # Saves, according to app_config.py, a file of ADDRESS information from local storage
     def saveAddresses(self):
         # Open the ADDRESS save file for WRITING
-        with open(str(Path.cwd() / (nc.ADDRESS_FILE_NAME + nc.FILE_EXTENSION)), "w", newline="") as csvFile:
+        with open(str(Path.cwd() / self.saveDirString / (nc.ADDRESS_FILE_NAME + nc.FILE_EXTENSION)), "w", newline="") as csvFile:
             csvWriter = csv.writer(csvFile, delimiter=",")
             # Iterate through each user in the allAddressDict
             # KEY = ADDRESS (STRING), VALUE = DISCORD USER ID (INT, but cast to string before saving)
@@ -184,9 +202,9 @@ class Wrapper():
     # Loads, according to app_config.py, a file of USER information from local storage
     def loadUsers(self):
          # CHECK FOR LOCAL SAVE FILE INPUT (now that the content has been downloaded)
-        if os.path.exists(str(Path.cwd() / (nc.USER_FILE_NAME + nc.FILE_EXTENSION))):
+        if os.path.exists(str(Path.cwd() / self.saveDirString / (nc.USER_FILE_NAME + nc.FILE_EXTENSION))):
             # Open the USER save file
-            with open(str(Path.cwd() / (nc.USER_FILE_NAME + nc.FILE_EXTENSION)), newline="") as csvFile:
+            with open(str(Path.cwd() / self.saveDirString / (nc.USER_FILE_NAME + nc.FILE_EXTENSION)), newline="") as csvFile:
                 csvReader = csv.reader(csvFile, delimiter=",")
                 # Iterates through each row in the input file
                 for row in csvReader:
@@ -209,9 +227,9 @@ class Wrapper():
     # Loads, according to app_config.py, a file of ADDRESS information from local storage
     def loadAddresses(self):
          # CHECK FOR LOCAL SAVE FILE INPUT (now that the content has been downloaded)
-        if os.path.exists(str(Path.cwd() / (nc.ADDRESS_FILE_NAME + nc.FILE_EXTENSION))):
+        if os.path.exists(str(Path.cwd() / self.saveDirString / (nc.ADDRESS_FILE_NAME + nc.FILE_EXTENSION))):
             # Open the ADDRESS save file
-            with open(str(Path.cwd() / (nc.ADDRESS_FILE_NAME + nc.FILE_EXTENSION)), newline="") as csvFile:
+            with open(str(Path.cwd() / self.saveDirString / (nc.ADDRESS_FILE_NAME + nc.FILE_EXTENSION)), newline="") as csvFile:
                 csvReader = csv.reader(csvFile, delimiter=",")
                 # Iterates through each row in the input file
                 for row in csvReader:

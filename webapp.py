@@ -24,7 +24,7 @@ def hello_world():
     # Defining scope of global variables
     global WRAPPER
 
-    outList = [WRAPPER.userList, WRAPPER.bucketName, (nc.USER_FILE_NAME + nc.FILE_EXTENSION), (nc.ADDRESS_FILE_NAME + nc.FILE_EXTENSION)]
+    outList = [WRAPPER.userList, WRAPPER.bucketName, WRAPPER.saveDirString, (nc.USER_FILE_NAME + nc.FILE_EXTENSION), (nc.ADDRESS_FILE_NAME + nc.FILE_EXTENSION)]
 
     return render_template("index.html", data=outList)
 

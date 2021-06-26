@@ -55,9 +55,8 @@ async def on_message(message):
             compAddress = message.content.upper()
             # Placeholder for overwriting userList contents
             overwriteIndex = -1
-            # Placeholder for previous LastTimestamp, if overwritten
+            # Placeholder for previous LastTimestamp/WalletAddress, if overwritten
             prevLastTimestamp = ""
-            # Placeholder for previous WalletAddress, if overwritten
             prevWalletAddress = ""
 
             # Get the current timestamp
@@ -70,9 +69,10 @@ async def on_message(message):
                 # Set the values of the prev variables
                 prevLastTimestamp = WRAPPER.userList[overwriteIndex][3]
                 prevWalletAddress = WRAPPER.userList[overwriteIndex][4]
-                # Update the LastTimestamp (index 3) and WalletAddress (index 4) values within the relevant row of userList
+                # Update the LastTimestamp (index 3), WalletAddress (index 4) and LastUsername (index 6) values within the relevant row of userList
                 WRAPPER.userList[overwriteIndex][3] = currentTimestamp
                 WRAPPER.userList[overwriteIndex][4] = compAddress
+                WRAPPER.userList[overwriteIndex][6] = str(message.author)
                 # Alert the user that they've successfully updated their wallet address
                 alertMessage = "Hello {}! You have successfully updated your wallet address!".format(message.author.mention)
             # If the Discord User has never submitted their address before
@@ -81,7 +81,7 @@ async def on_message(message):
                 WRAPPER.userDict[message.author.id] = WRAPPER.userCount
                 # A 1-D list (of mixed types) which holds the elements to be inserted into userList
                 # NOTE: Be aware that this list stores the ALL-UPPERCASE version of the user's wallet address
-                userInfo = [message.author.id, WRAPPER.userCount, currentTimestamp, currentTimestamp, compAddress, str(message.author)]
+                userInfo = [message.author.id, WRAPPER.userCount, currentTimestamp, currentTimestamp, compAddress, str(message.author), str(message.author)]
                 # Append this new "user row" to the userList list
                 WRAPPER.userList.append(userInfo)
 
@@ -114,6 +114,8 @@ async def on_message(message):
                     if overwriteIndex != -1:
                         WRAPPER.userList[WRAPPER.userDict[message.author.id]][3] = prevLastTimestamp
                         WRAPPER.userList[WRAPPER.userDict[message.author.id]][4] = prevWalletAddress
+                        # NOTE: We explicitly do not revert their username, since this is a useful update to keep regardless
+                        # TODO: Consider whether to skip the reversion of the LastTimestamp update as well
                         # Set failedRegistration to True
                         failedRegistration = True
                         # Print information (to the console) about the failed registration

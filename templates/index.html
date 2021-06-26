@@ -26,7 +26,8 @@
                 <div class="divTableCell">First Time</div>
                 <div class="divTableCell">Last Time</div>
                 <div class="divTableCell">Wallet Address</div>
-                <div class="divTableCell">Discord Username</div>
+                <div class="divTableCell">First Username</div>
+                <div class="divTableCell">Last Username</div>
             </div>
             {% for row in data[0] %}
                 <div class="divTableRow">
@@ -36,6 +37,7 @@
                     <div class="divTableCell">{{ row[3] }}</div>
                     <div class="divTableCell">{{ row[4] }}</div>
                     <div class="divTableCell">{{ row[5] }}</div>
+                    <div class="divTableCell">{{ row[6] }}</div>
                 </div>
             {% endfor %}
         </div>

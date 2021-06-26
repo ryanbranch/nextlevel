@@ -9,6 +9,7 @@ from botocore.exceptions import ClientError
 
 # LOCAL IMPORTS
 import nextlevel_config as nc
+import nextlevel_strings as nstrings
 
 # WRAPPER CLASS DEFINITION
 class Wrapper():
@@ -43,7 +44,8 @@ class Wrapper():
         # 2: First Timestamp
         # 3: Last Timestamp
         # 4: Wallet Address
-        # 5: Discord Username
+        # 5: First Discord Username
+        # 6: Current Discord Username
         self.userList = []
         # userDict is a dictionary mapping string keys (Discord User ID) to integer values (user index integer)
         self.userDict = {}
@@ -125,26 +127,9 @@ class Wrapper():
         userFilepath = str(Path.cwd() / self.saveDirString / (nc.USER_FILE_NAME + nc.FILE_EXTENSION))
         addressFilepath = str(Path.cwd() / self.saveDirString / (nc.ADDRESS_FILE_NAME + nc.FILE_EXTENSION))
 
-        # Open the USER save file for WRITING
-        with open(userFilepath, "w", newline="") as csvFile:
-            csvWriter = csv.writer(csvFile, delimiter=",")
-            # Iterate through each user in the userList
-            for sublist in self.userList:
-                csvWriter.writerow([str(sublist[0]), str(sublist[1]), sublist[2], sublist[3], sublist[4], sublist[5]])
-            # Print information about the successful write operation
-            if nc.ENABLE_CONSOLE_OUTPUT:
-                print("Successfully saved USER file with " + str(self.userCount) + " rows.")
-
-        # Open the ADDRESS save file for WRITING
-        with open(addressFilepath, "w", newline="") as csvFile:
-            csvWriter = csv.writer(csvFile, delimiter=",")
-            # Iterate through each user in the allAddressDict
-            # KEY = ADDRESS (STRING), VALUE = DISCORD USER ID (INT, but cast to string before saving)
-            for address in self.allAddressDict:
-                csvWriter.writerow([address, str(self.allAddressDict[address])])
-            # Print information about the successful write operation
-            if nc.ENABLE_CONSOLE_OUTPUT:
-                print("Successfully saved ADDRESS file with " + str(self.allAddressCount) + " rows.")
+        # Save copies of the existing files before uploading
+        self.saveUsers()
+        self.saveAddresses()
 
         # AMAZON WEB SERVICES S3 BUCKET SAVING (UPLOADING)
         # Attempt to upload the USER file to S3
@@ -177,7 +162,7 @@ class Wrapper():
             csvWriter = csv.writer(csvFile, delimiter=",")
             # Iterate through each user in the userList
             for sublist in self.userList:
-                csvWriter.writerow([str(sublist[0]), str(sublist[1]), sublist[2], sublist[3], sublist[4], sublist[5]])
+                csvWriter.writerow([str(elt) for elt in sublist])
             # Print information about the successful write operation
             if nc.ENABLE_CONSOLE_OUTPUT:
                 print("Successfully saved USER file with " + str(self.userCount) + " rows.")

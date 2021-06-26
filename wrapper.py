@@ -10,6 +10,7 @@ from botocore.exceptions import ClientError
 # LOCAL IMPORTS
 import nextlevel_config as nc
 import nextlevel_strings as nstrings
+import secret
 
 # WRAPPER CLASS DEFINITION
 class Wrapper():
@@ -30,7 +31,15 @@ class Wrapper():
         # s3: boto3 client instance
         self.s3 = boto3.client("s3")
         # token: The unique authentication token from the "Bot" section of your Discord App
-        self.token = "" # The empty string is a placeholder; the true value will be loaded from a file
+        self.token = secret.AUTH_TOKEN_DISCORD
+        # AMAZON WEB SERVICES S3 BUCKET NAME RETRIEVAL
+        self.bucketName = None
+        # AWS bucket name retrieval
+        # Gets the name of the S3 bucket based on Heroku configuration
+        self.bucketName = os.environ.get('S3_BUCKET')
+        # Fixes this if running locally
+        if not nc.FLAG_HEROKU:
+            self.bucketName = secret.AWS_S3_BUCKET
 
         # DEFAULT AND PLACEHOLDER VALUES OF MEMBER VARIABLES
         # The total number of unique wallet addresses which have been submitted through the application
@@ -52,23 +61,6 @@ class Wrapper():
         # allAddressDict is a dictionary mapping string keys (ALL-UPPERCASE address) to integer values (user index integer)
         self.allAddressDict = {}
 
-        # AMAZON WEB SERVICES S3 BUCKET NAME RETRIEVAL
-        self.bucketName = None
-        # AWS bucket name retrieval
-        # Gets the name of the S3 bucket based on Heroku configuration
-        self.bucketName = os.environ.get('S3_BUCKET')
-        # Fixes this if running locally
-        if not nc.FLAG_HEROKU:
-            # CHECK FOR EXISTENCE OF BUCKET FILE
-            if not os.path.exists(str(Path.cwd() / (nc.BUCKET_FILE_NAME + nc.BUCKET_FILE_EXTENSION))):
-                print("ERROR: Please create a {}{} file containing your AWS Bucket Name.".format(nc.BUCKET_FILE_NAME, nc.BUCKET_FILE_EXTENSION))
-                print("Program will now exit before any attempt to establish an AWS connection")
-                # Exit early if not found.
-                exit(1001)
-            # OPEN BUCKET FILE
-            with open(str(Path.cwd() / (nc.BUCKET_FILE_NAME + nc.BUCKET_FILE_EXTENSION)), newline="") as bucketFile:
-                self.bucketName = bucketFile.readline()
-
         # DOWNLOADING CONTENT FROM AWS S3 BUCKET
         self.downloadS3()
 
@@ -79,12 +71,6 @@ class Wrapper():
         # Wrapper creation success message
         if nc.ENABLE_CONSOLE_OUTPUT:
             print("Wrapper instance created successfully!")
-
-
-    # setToken
-    # Set method for the self.token value
-    def setToken(self, inVal):
-        self.token = inVal
 
 
     # downloadS3

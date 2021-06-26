@@ -10,6 +10,7 @@ from discord import Intents
 # LOCAL IMPORTS
 import nextlevel_config as nc
 import wrapper
+import secret
 
 
 # GLOBAL VARIABLES
@@ -179,26 +180,9 @@ def checkAddressValidity(stringIn):
     return True
 
 
-def loadBotToken():
-    # DISCORD BOT AUTHENTICATION TOKEN LOADING
-    # If the token file does not exist
-    if not os.path.exists(str(Path.cwd() / (nc.TOKEN_FILE_NAME + nc.TOKEN_FILE_EXTENSION))):
-        print("ERROR: Please create a {}{} file containing your Discord Bot Authentication Token.".format(nc.TOKEN_FILE_NAME, nc.TOKEN_FILE_EXTENSION))
-        print("Program will now exit before any attempt to establish a bot connection")
-        # Exit early if not found.
-        exit(1000)
-    # Otherwise, proceed with opening the token file
-    outVal = ""
-    with open(str(Path.cwd() / (nc.TOKEN_FILE_NAME + nc.TOKEN_FILE_EXTENSION)), newline="") as tokenFile:
-        outVal = tokenFile.readline()
-    return outVal
-
-
 def main():
     # Use the GLOBAL value of WRAPPER
     global WRAPPER
-    # Load the value of the authentication token
-    WRAPPER.setToken(loadBotToken())
 
     bot.run(WRAPPER.token)
 

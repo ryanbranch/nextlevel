@@ -1,4 +1,5 @@
 # AUTHENTICATION KEYS AND OTHER CONFIDENTIAL INFORMATION
+secret.py
 bucket.txt
 token.txt
 
